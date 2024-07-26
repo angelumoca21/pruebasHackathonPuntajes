@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Datos</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="form">
+            <button id="consultar">Consultar Usuarios</button>
+            <div id="resultado"></div>
+        </div>
+    </div>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-DM0yFWbFpeIGF3eTSpDo8gOEvitRXkM",
+            authDomain: "pruebahackathon-eea94.firebaseapp.com",
+            projectId: "pruebahackathon-eea94",
+            storageBucket: "pruebahackathon-eea94.appspot.com",
+            messagingSenderId: "743812823032",
+            appId: "1:743812823032:web:0d105ab1c5f02d52e6480d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById("consultar").addEventListener("click", function() {
+            const dbRef = ref(db);
+            get(child(dbRef, 'user')).then((snapshot) => {
+                if (snapshot.exists()) {
+                    let users = [];
+                    snapshot.forEach(childSnapshot => {
+                        users.push(childSnapshot.val());
+                    });
+
+                    // Ordenar los usuarios por score en orden descendente
+                    users.sort((a, b) => b.score - a.score);
+
+                    // Crear una tabla para mostrar los usuarios
+                    let resultHTML = `<table>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Score</th>
+                                            <th>Spot</th>
+                                        </tr>`;
+                    users.forEach(user => {
+                        resultHTML += `<tr>
+                                        <td>${user.username}</td>
+                                        <td>${user.score}</td>
+                                        <td>${user.spot}</td>
+                                       </tr>`;
+                    });
+                    resultHTML += `</table>`;
+
+                    document.getElementById("resultado").innerHTML = resultHTML;
+                } else {
+                    document.getElementById("resultado").innerHTML = "No se encontraron usuarios.";
+                }
+            }).catch((error) => {
+                console.error("Error al consultar los datos: ", error);
+                document.getElementById("resultado").innerHTML = "Error al consultar los datos.";
+            });
+        });
+    </script>
+</body>
+</html>
